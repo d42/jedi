@@ -195,7 +195,6 @@ class Instance(use_metaclass(CachedMetaClass, Executed)):
         for names_dict in self.base.names_dicts(search_global=False, is_instance=True):
             if '__slots__' in names_dict:
                 for name, slot in self._get_slots(self._evaluator, names_dict):
-                    names_dict.setdefault(name, slot)
 
                     if name not in names_dict:
                         names_dict[name] = slot
