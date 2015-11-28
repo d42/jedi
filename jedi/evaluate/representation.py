@@ -193,6 +193,13 @@ class Instance(use_metaclass(CachedMetaClass, Executed)):
                     yield inst._self_names_dict(add_mro=False)
 
         for names_dict in self.base.names_dicts(search_global=False, is_instance=True):
+            if '__slots__' in names_dict:
+                for name, slot in self._get_slots(self._evaluator, names_dict):
+                    names_dict.setdefault(name, slot)
+
+                    if name not in names_dict:
+                        names_dict[name] = slot
+
             yield LazyInstanceDict(self._evaluator, self, names_dict)
 
     def get_index_types(self, evaluator, index_array):
@@ -210,6 +217,16 @@ class Instance(use_metaclass(CachedMetaClass, Executed)):
             return []
         else:
             return self._evaluator.execute(method, [iterable.AlreadyEvaluated(indexes)])
+
+    def _get_slots(self, evaluator, names_dict):
+        slots = names_dict['__slots__'][0]
+        statement = slots.parent
+        node = self._evaluator.eval_statement(statement)[0]
+        for v in node:
+            pos = v.start_pos
+            name = self._evaluator.eval_element(v)[0].obj
+            yield name, [helpers.FakeName(name, self, pos, True)]
+
 
     @property
     @underscore_memoization

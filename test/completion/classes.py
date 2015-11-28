@@ -473,3 +473,32 @@ B().a
 B.b
 #? int()
 B().b
+
+
+# -----------------
+# __slots__
+# -----------------
+
+class A(object):
+    __slots__ = 'A_1', 'A_2'
+
+#? ['A_1', 'A_2']
+A().A
+
+
+class A(object):
+    __slots__ = 'A_1', 'A_2'
+
+
+class B(A):
+    __slots__ = 'B_1', 'B_2'
+
+
+class C(B):
+    def __init__(self):
+        self.B_1 = 123
+
+#? ['B_1', 'B_2']
+C().B
+#? int()
+C().B_1
