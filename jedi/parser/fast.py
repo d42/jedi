@@ -77,6 +77,13 @@ class MergedNamesDict(object):
     def __getitem__(self, value):
         return list(chain.from_iterable(dct.get(value, []) for dct in self.dicts))
 
+    def __setitem__(self, key, value):
+        for d in self.dicts:
+            if key in d:
+                d[key] = value
+        else:
+            self.dicts.append({key: value})
+
     def items(self):
         dct = {}
         for d in self.dicts:
