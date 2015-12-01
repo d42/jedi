@@ -195,7 +195,7 @@ class Script(object):
         :return: Completion objects, sorted by name and __ comes last.
         :rtype: list of :class:`classes.Completion`
         """
-        def get_completions(user_stmt, bs):
+        def get_completions(user_stmt):
             # TODO this closure is ugly. it also doesn't work with
             # simple_complete (used for Interpreter), somehow redo.
             completion_names = []
@@ -231,7 +231,7 @@ class Script(object):
 
         user_stmt = self._parser.user_stmt_with_whitespace()
 
-        completion_names = get_completions(user_stmt, compiled.builtin)
+        completion_names = get_completions(user_stmt)
 
         if not dot:
             # add named params
