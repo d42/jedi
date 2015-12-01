@@ -213,8 +213,7 @@ class Script(object):
 
         user_stmt = self._parser.user_stmt_with_whitespace()
 
-        b = compiled.builtin
-        completion_names = get_completions(user_stmt, b)
+        completion_names = get_completions(user_stmt, compiled.builtin)
 
         if not dot:
             # add named params
