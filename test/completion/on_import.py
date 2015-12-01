@@ -63,6 +63,15 @@ import datetime.date
 
 #? 21 ['import']
 from import_tree.pkg import pkg
+
+#? 22 ['import']
+from .import_tree.pkg import pkg
+
+#? 18 ['import']
+from .import_tree import pkg
+
+
+# TODO: is this test correct :3
 #? 22 ['mod1']
 from import_tree.pkg. import mod1
 #? 17 ['mod1', 'mod2', 'random', 'pkg', 'rename1', 'rename2', 'recurse_class1', 'recurse_class2', 'invisible_pkg']
