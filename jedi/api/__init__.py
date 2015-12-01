@@ -207,9 +207,7 @@ class Script(object):
 
         debug.speed('completions start')
         path = self._user_context.get_path_until_cursor()
-        # Dots following an int are not the start of a completion but a float
-        # literal.
-        if re.search(r'^\d\.$', path):
+        if path.isdigit():
             return []
         path, dot, like = helpers.completion_parts(path)
 
