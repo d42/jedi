@@ -163,7 +163,6 @@ class Script(object):
             if pos_after_path:  # from herp.derp |
                 return keywords.keyword_names('import')
 
-        module = self._parser.module()
         completion_names += imports.completion_names(
             self._evaluator, user_stmt, self._pos)
 
