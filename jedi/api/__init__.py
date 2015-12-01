@@ -169,6 +169,25 @@ class Script(object):
 
         return completion_names
 
+    def _filter_completions(self, like, completion_names, needs_dot):
+        comp_dct = {}
+        for c in set(completion_names):
+            if not helpers.name_like(str(c), like, settings.case_insensitive_completion):
+                continue
+
+            if isinstance(c.parent, (tree.Function, tree.Class)):
+                # TODO I think this is a hack. It should be an
+                #   er.Function/er.Class before that.
+                c = self._evaluator.wrap(c.parent).name
+
+            new = classes.Completion(self._evaluator, c, needs_dot, len(like))
+            key = (new.name, new.complete)
+            if key in comp_dct and settings.no_completion_duplicates:
+                comp_dct[key]._same_name_completions.append(new)
+            else:
+                comp_dct[key] = new
+        return comp_dct
+
     def completions(self):
         """
         Return :class:`classes.Completion` objects. Those objects contain
@@ -231,27 +250,9 @@ class Script(object):
 
         needs_dot = not dot and path
 
-        comps = []
-        comp_dct = {}
-        for c in set(completion_names):
-            n = str(c)
-            if settings.case_insensitive_completion \
-                    and n.lower().startswith(like.lower()) \
-                    or n.startswith(like):
-                if isinstance(c.parent, (tree.Function, tree.Class)):
-                    # TODO I think this is a hack. It should be an
-                    #   er.Function/er.Class before that.
-                    c = self._evaluator.wrap(c.parent).name
-                new = classes.Completion(self._evaluator, c, needs_dot, len(like))
-                k = (new.name, new.complete)  # key
-                if k in comp_dct and settings.no_completion_duplicates:
-                    comp_dct[k]._same_name_completions.append(new)
-                else:
-                    comp_dct[k] = new
-                    comps.append(new)
-
+        comp_dct = self._filter_completions(like, completion_names, needs_dot)
         debug.speed('completions end')
-
+        comps = comp_dct.values()
         return sorted(comps, key=lambda x: (x.name.startswith('__'),
                                             x.name.startswith('_'),
                                             x.name.lower()))
