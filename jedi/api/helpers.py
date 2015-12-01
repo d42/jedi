@@ -35,10 +35,13 @@ def get_on_import_stmt(evaluator, user_context, user_stmt, is_like_search=False)
 
 
 def check_error_statements(module, pos):
-    for error_statement in module.error_statement_stacks:
-        if error_statement.first_type in ('import_from', 'import_name') \
-                and error_statement.first_pos < pos <= error_statement.next_start_pos:
-            return importer_from_error_statement(error_statement, pos)
+    for error_stmt in module.error_statement_stacks:
+
+        import_error = error_stmt.first_type in ('import_from', 'import_name')
+        error_on_pos = error_stmt.first_pos < pos <= error_stmt.next_start_pos
+
+        if import_error and error_on_pos:
+            return importer_from_error_statement(error_stmt, pos)
     return None, 0, False, False
 
 
