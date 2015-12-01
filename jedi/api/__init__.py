@@ -196,7 +196,6 @@ class Script(object):
                 return completion_names
 
             if not path and not dot:
-                # add keywords
                 completion_names += keywords.keyword_names(all=True)
 
                 # TODO delete? We should search for valid parser
