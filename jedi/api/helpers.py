@@ -5,6 +5,7 @@ import re
 
 from jedi.parser import tree as pt
 from jedi.evaluate import imports
+from jedi.evaluate import compiled
 
 
 def completion_parts(path_until_cursor):
@@ -19,6 +20,30 @@ def completion_parts(path_until_cursor):
 def sorted_definitions(defs):
     # Note: `or ''` below is required because `module_path` could be
     return sorted(defs, key=lambda x: (x.module_path or '', x.line or 0, x.column or 0))
+
+
+def name_like(name, like, case_insensitive):
+    if case_insensitive:
+        name = name.lower()
+        like = like.lower()
+    return name.startswith(like)
+
+
+def get_named_params(call_signatures):
+    named_params = []
+    # add named params
+    for call_sig in call_signatures:
+        # Allow protected access, because it's a public API.
+        module = call_sig._name.get_parent_until()
+        # Compiled modules typically don't allow keyword arguments.
+        if not isinstance(module, compiled.CompiledObject):
+            for p in call_sig.params:
+                # Allow access on _definition here, because it's a
+                # public API and we don't want to make the internal
+                # Name object public.
+                if p._definition.stars == 0:  # no *args/**kwargs
+                    named_params.append(p._name)
+    return named_params
 
 
 def get_on_import_stmt(evaluator, user_context, user_stmt, is_like_search=False):

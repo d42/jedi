@@ -234,18 +234,7 @@ class Script(object):
         completion_names = get_completions(user_stmt)
 
         if not dot:
-            # add named params
-            for call_sig in self.call_signatures():
-                # Allow protected access, because it's a public API.
-                module = call_sig._name.get_parent_until()
-                # Compiled modules typically don't allow keyword arguments.
-                if not isinstance(module, compiled.CompiledObject):
-                    for p in call_sig.params:
-                        # Allow access on _definition here, because it's a
-                        # public API and we don't want to make the internal
-                        # Name object public.
-                        if p._definition.stars == 0:  # no *args/**kwargs
-                            completion_names.append(p._name)
+            completion_names += helpers.get_named_params(self.call_signatures())
 
         needs_dot = not dot and path
 
