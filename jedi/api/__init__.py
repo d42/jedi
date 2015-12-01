@@ -151,6 +151,23 @@ class Script(object):
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, repr(self._orig_path))
 
+    def _import_completions(self, user_stmt, old_names=None):
+        completion_names = old_names or []
+
+        last_node = next((c for c in reversed(user_stmt.children)
+                          if c.end_pos < self._pos), None)
+
+        if last_node and not user_stmt.name_for_position(self._pos):
+            pos_after_path = last_node.type in ('name', 'dotted_name')
+            if pos_after_path:  # from herp.derp |
+                return keywords.keyword_names('import')
+
+        module = self._parser.module()
+        completion_names += imports.completion_names(
+            self._evaluator, user_stmt, self._pos)
+
+        return completion_names
+
     def completions(self):
         """
         Return :class:`classes.Completion` objects. Those objects contain
@@ -162,38 +179,30 @@ class Script(object):
         def get_completions(user_stmt, bs):
             # TODO this closure is ugly. it also doesn't work with
             # simple_complete (used for Interpreter), somehow redo.
+            completion_names = []
+
             module = self._evaluator.wrap(self._parser.module())
             names, level, only_modules, unfinished_dotted = \
                 helpers.check_error_statements(module, self._pos)
-            completion_names = []
-            if names is not None:
+            if names:
                 imp_names = tuple(str(n) for n in names if n.end_pos < self._pos)
                 i = imports.Importer(self._evaluator, imp_names, module, level)
                 completion_names = i.completion_names(self._evaluator, only_modules)
-
-            # TODO this paragraph is necessary, but not sure it works.
-            context = self._user_context.get_context()
-            if not next(context).startswith('.'):  # skip the path
-                if next(context) == 'from':
-                    # completion is just "import" if before stands from ..
-                    if unfinished_dotted:
-                        return completion_names
-                    else:
-                        return keywords.keyword_names('import')
-
-            if isinstance(user_stmt, tree.Import):
-                module = self._parser.module()
-                completion_names += imports.completion_names(self._evaluator,
-                                                             user_stmt, self._pos)
                 return completion_names
 
-            if names is None and not isinstance(user_stmt, tree.Import):
-                if not path and not dot:
-                    # add keywords
-                    completion_names += keywords.keyword_names(all=True)
-                    # TODO delete? We should search for valid parser
-                    # transformations.
-                completion_names += self._simple_complete(path, dot, like)
+            if isinstance(user_stmt, tree.Import):
+                completion_names = self._import_completions(user_stmt, completion_names)
+
+                return completion_names
+
+            if not path and not dot:
+                # add keywords
+                completion_names += keywords.keyword_names(all=True)
+
+                # TODO delete? We should search for valid parser
+                # transformations.
+
+            completion_names += self._simple_complete(path, dot, like)
             return completion_names
 
         debug.speed('completions start')
