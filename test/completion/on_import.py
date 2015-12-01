@@ -1,4 +1,4 @@
-def from_names():
+:wdef from_names():
     #? ['mod1']
     from import_tree.pkg.
     #? ['path']
@@ -70,6 +70,9 @@ from .import_tree.pkg import pkg
 #? 18 ['import']
 from .import_tree import pkg
 
+#? 7 ['import']
+from . import pkg
+
 
 # TODO: is this test correct :3
 #? 22 ['mod1']
@@ -110,4 +113,5 @@ import json, datetime
 import json, datetime
 #? 13 datetime
 import json, datetime
+
 

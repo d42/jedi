@@ -158,7 +158,8 @@ class Script(object):
                           if c.end_pos < self._pos), None)
 
         if last_node and not user_stmt.name_for_position(self._pos):
-            pos_after_path = last_node.type in ('name', 'dotted_name')
+            pos_after_path = last_node.type in ('name', 'dotted_name') \
+                    or last_node.type == 'operator' and last_node.value == '.'
             if pos_after_path:  # from herp.derp |
                 return keywords.keyword_names('import')
 
