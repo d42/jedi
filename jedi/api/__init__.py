@@ -630,10 +630,8 @@ class Interpreter(Script):
             class NamespaceModule(object):
                 def __getattr__(_, name):
                     for n in self.namespaces:
-                        try:
+                        with common.ignored(KeyError):
                             return n[name]
-                        except KeyError:
-                            pass
                     raise AttributeError()
 
                 def __dir__(_):
@@ -646,10 +644,8 @@ class Interpreter(Script):
             for p in paths:
                 old, namespaces = namespaces, []
                 for n in old:
-                    try:
+                    with common.ignored(AttributeError):
                         namespaces.append(getattr(n, p))
-                    except Exception:
-                        pass
 
             completion_names = []
             for namespace in namespaces:
