@@ -1,4 +1,4 @@
-:wdef from_names():
+def from_names():
     #? ['mod1']
     from import_tree.pkg.
     #? ['path']
@@ -113,5 +113,4 @@ import json, datetime
 import json, datetime
 #? 13 datetime
 import json, datetime
-
 
